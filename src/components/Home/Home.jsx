@@ -1,8 +1,39 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import './Home.css'
+import calidad from '../../assets/calidad.jpg'
+import entregarapida from '../../assets/entregarapida.jpg'
+import envio from '../../assets/envio-24hz.png'
 import { Link } from 'react-router-dom'
+import { db } from '../../conifg/Config' // Importa la instancia de Firestore desde tu configuración
 
 const Home = () => {
+  const [selectedProducts, setSelectedProducts] = useState([])
+
+  useEffect(() => {
+    const fetchSelectedProducts = async () => {
+      try {
+        const productsRef = db.collection('products') // Referencia a la colección 'products' en Firestore
+        const snapshot = await productsRef.limit(3).get() // Limita la consulta a 3 productos seleccionados
+
+        if (snapshot.empty) {
+          console.log('No hay productos seleccionados disponibles.')
+          return
+        }
+
+        const products = []
+        snapshot.forEach((doc) => {
+          products.push({ id: doc.id, ...doc.data() })
+        })
+
+        setSelectedProducts(products)
+      } catch (error) {
+        console.error('Error fetching products:', error)
+      }
+    }
+
+    fetchSelectedProducts()
+  }, [])
+
   return (
     <div className='wrapper'>
       <div className='hero'>
@@ -16,7 +47,7 @@ const Home = () => {
       <section className='features'>
         <div className='feature-item'>
           <img
-            src='/images/feature1.jpg'
+            src={calidad}
             alt='Feature 1'
           />
           <h3>Calidad Garantizada</h3>
@@ -26,7 +57,7 @@ const Home = () => {
         </div>
         <div className='feature-item'>
           <img
-            src='/images/feature2.jpg'
+            src={entregarapida}
             alt='Feature 2'
           />
           <h3>Entrega Rápida</h3>
@@ -36,7 +67,7 @@ const Home = () => {
         </div>
         <div className='feature-item'>
           <img
-            src='/images/feature3.jpg'
+            src={envio}
             alt='Feature 3'
           />
           <h3>Soporte 24/7</h3>
@@ -47,35 +78,24 @@ const Home = () => {
         </div>
       </section>
 
-      <section className='products'>
+      {/* <section className='products'>
         <h2>Productos Destacados</h2>
         <div className='product-list'>
-          <div className='product-item'>
-            <img
-              src='/images/product1.jpg'
-              alt='Producto 1'
-            />
-            <h4>Producto 1</h4>
-            <p>$19.99</p>
-          </div>
-          <div className='product-item'>
-            <img
-              src='/images/product2.jpg'
-              alt='Producto 2'
-            />
-            <h4>Producto 2</h4>
-            <p>$29.99</p>
-          </div>
-          <div className='product-item'>
-            <img
-              src='/images/product3.jpg'
-              alt='Producto 3'
-            />
-            <h4>Producto 3</h4>
-            <p>$39.99</p>
-          </div>
+          {selectedProducts.map((product) => (
+            <div
+              className='product-item'
+              key={product.id}
+            >
+              <img
+                src={product.imagen}
+                alt={product.name}
+              />
+              <h4>{product.name}</h4>
+              <p>${product.price}</p>
+            </div>
+          ))}
         </div>
-      </section>
+      </section> */}
     </div>
   )
 }
