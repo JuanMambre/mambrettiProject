@@ -14,7 +14,7 @@ import Detail from './components/Detail/Detail'
 import Cart from './components/Cart/Cart'
 import { CartContextProvider } from './global/CartContext'
 
-function App() {
+function authListener() {
   const [user, setUser] = useState(null)
 
   useEffect(() => {
@@ -76,4 +76,4 @@ function App() {
   )
 }
 
-export default App
+export default authListener
