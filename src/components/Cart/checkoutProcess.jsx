@@ -62,7 +62,7 @@ const CheckoutProcess = ({ userEmail }) => {
 
   const handleCloseCart = () => {
     setShowPopup(false)
-    // window.location.reload()
+    navigate('/')
   }
 
   if (!showPopup) {
