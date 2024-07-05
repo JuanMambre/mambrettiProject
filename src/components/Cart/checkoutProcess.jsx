@@ -1,11 +1,9 @@
-// CheckoutProcess.jsx
-
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCart } from '../../global/CartContext'
 import { auth, db } from '../../conifg/Config'
 import { collection, addDoc } from 'firebase/firestore'
-import './Check.css' // Importamos el archivo de estilos CSS
+import './Check.css'
 
 const CheckoutProcess = ({ userEmail }) => {
   const [firstName, setFirstName] = useState('')
@@ -18,20 +16,17 @@ const CheckoutProcess = ({ userEmail }) => {
 
   const handleConfirmPurchase = async () => {
     try {
-      // Validar que el usuario esté autenticado
       if (!auth.currentUser) {
         setError('Debes iniciar sesión para realizar una compra.')
         navigate('/login')
         return
       }
 
-      // Validar que se haya ingresado nombre y apellido
       if (!firstName.trim() || !lastName.trim()) {
         setError('Por favor, ingresa tu nombre y apellido.')
         return
       }
 
-      // Crear la orden en Firestore
       const orderRef = await addDoc(collection(db, 'orders'), {
         userId: auth.currentUser.uid,
         userEmail: userEmail || auth.currentUser.email,
@@ -58,6 +53,10 @@ const CheckoutProcess = ({ userEmail }) => {
         'Hubo un problema al procesar tu orden. Por favor, inténtalo de nuevo.'
       )
     }
+  }
+
+  const handleClose = () => {
+    navigate('/')
   }
 
   return (
@@ -94,6 +93,12 @@ const CheckoutProcess = ({ userEmail }) => {
       ) : (
         <div className='checkout-popup'>
           <p>Orden creada con éxito. ID de la orden: {orderId}</p>
+          <button
+            className='checkout-btn'
+            onClick={handleClose}
+          >
+            Cerrar
+          </button>
         </div>
       )}
     </div>
