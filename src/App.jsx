@@ -1,15 +1,9 @@
 // App.jsx
 import React from 'react'
-import { BrowserRouter as Router } from 'react-router-dom'
-import './index.css'
-import AuthListener from './authListener' // Importa el componente AuthListener
+import AuthListener from './authListener'
 
 function App() {
-  return (
-    <Router>
-      <AuthListener />
-    </Router>
-  )
+  return <AuthListener />
 }
 
 export default App
