@@ -59,6 +59,10 @@ const CheckoutProcess = ({ userEmail }) => {
     navigate('/')
   }
 
+  const handleCloseCart = () => {
+    window.location.reload() // Recarga la página actual
+  }
+
   return (
     <div className='checkout-process'>
       {!orderId ? (
@@ -88,6 +92,12 @@ const CheckoutProcess = ({ userEmail }) => {
             onClick={handleConfirmPurchase}
           >
             Aceptar
+          </button>
+          <button
+            className='checkout-btn'
+            onClick={handleCloseCart}
+          >
+            Cerrar
           </button>
         </div>
       ) : (
