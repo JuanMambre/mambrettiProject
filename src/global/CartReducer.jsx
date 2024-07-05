@@ -1,4 +1,3 @@
-// CartReducer.js
 const CartReducer = (state, action) => {
   const { shoppingCart, totalPrice, totalQty } = state
 
@@ -10,13 +9,25 @@ const CartReducer = (state, action) => {
       )
 
       if (existingProduct) {
-        console.log('Product is already in your cart')
-        return state
+        const updatedCart = shoppingCart.map((item) =>
+          item.ProductId === product.ProductId
+            ? { ...item, qty: item.qty + product.quantity }
+            : item
+        )
+        const updatedPrice = totalPrice + product.price * product.quantity
+        const updatedQty = totalQty + product.quantity
+
+        return {
+          ...state,
+          shoppingCart: updatedCart,
+          totalPrice: updatedPrice,
+          totalQty: updatedQty
+        }
       } else {
-        const newProduct = { ...product, qty: 1 }
+        const newProduct = { ...product, qty: product.quantity }
         const updatedCart = [...shoppingCart, newProduct]
-        const updatedPrice = totalPrice + newProduct.price
-        const updatedQty = totalQty + 1
+        const updatedPrice = totalPrice + newProduct.price * newProduct.quantity
+        const updatedQty = totalQty + newProduct.quantity
 
         return {
           ...state,
@@ -29,24 +40,23 @@ const CartReducer = (state, action) => {
 
     case 'REMOVE_FROM_CART': {
       const { productId } = action
-      const updatedCart = shoppingCart.filter(
-        (item) => item.ProductId !== productId
-      )
       const productToRemove = shoppingCart.find(
         (item) => item.ProductId === productId
       )
-      const updatedPrice = productToRemove
-        ? totalPrice - productToRemove.price * productToRemove.qty
-        : totalPrice
-      const updatedQty = productToRemove
-        ? totalQty - productToRemove.qty
-        : totalQty
+      if (!productToRemove) return state
+
+      const updatedCart = shoppingCart.filter(
+        (item) => item.ProductId !== productId
+      )
+      const updatedPrice =
+        totalPrice - productToRemove.price * productToRemove.qty
+      const updatedQty = totalQty - productToRemove.qty
 
       return {
         ...state,
         shoppingCart: updatedCart,
-        totalPrice: updatedCart.length === 0 ? 0 : updatedPrice,
-        totalQty: updatedCart.length === 0 ? 0 : updatedQty
+        totalPrice: updatedPrice,
+        totalQty: updatedQty
       }
     }
 
@@ -72,13 +82,15 @@ const CartReducer = (state, action) => {
 
     case 'DECREASE_QUANTITY': {
       const { productId } = action
+      const product = shoppingCart.find((item) => item.ProductId === productId)
+      if (product.qty === 1) return state
+
       const updatedCart = shoppingCart.map((item) => {
-        if (item.ProductId === productId && item.qty > 1) {
+        if (item.ProductId === productId) {
           return { ...item, qty: item.qty - 1 }
         }
         return item
       })
-      const product = shoppingCart.find((item) => item.ProductId === productId)
       const updatedPrice = totalPrice - product.price
       const updatedQty = totalQty - 1
 
@@ -89,6 +101,7 @@ const CartReducer = (state, action) => {
         totalQty: updatedCart.length === 0 ? 0 : updatedQty
       }
     }
+
     case 'CLEAR_CART':
       return {
         ...state,

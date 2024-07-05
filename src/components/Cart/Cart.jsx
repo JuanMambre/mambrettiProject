@@ -1,36 +1,19 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useCart } from '../../global/CartContext'
-import { auth, db } from '../../conifg/Config'
+import { auth } from '../../conifg/Config'
 import { useNavigate } from 'react-router-dom'
-import { collection, query, where, getDocs } from 'firebase/firestore'
 import { Icon } from 'react-icons-kit'
 import { remove } from 'react-icons-kit/fa/remove'
 import { plus } from 'react-icons-kit/fa/plus'
 import { minus } from 'react-icons-kit/fa/minus'
 import './Cart.css'
+import CheckoutProcess from './checkoutProcess' // Asegúrate de importar correctamente
 
 const Cart = () => {
   const { state, dispatch } = useCart()
   const { shoppingCart, totalPrice, totalQty } = state
   const navigate = useNavigate()
-
-  const [isAuthChecked, setIsAuthChecked] = useState(false)
   const [showPopup, setShowPopup] = useState(false)
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [currentUser, setCurrentUser] = useState(null)
-
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      setCurrentUser(user)
-      setIsAuthChecked(true)
-      if (user) {
-        setEmail(user.email) // Establecer el email del usuario autenticado
-      }
-    })
-
-    return () => unsubscribe()
-  }, [])
 
   const handleRemoveFromCart = (productId) => {
     dispatch({ type: 'REMOVE_FROM_CART', productId })
@@ -45,43 +28,11 @@ const Cart = () => {
   }
 
   const handlePurchase = () => {
-    if (currentUser) {
+    if (auth.currentUser) {
       setShowPopup(true)
     } else {
-      alert('Para proceder con tu compra debes loguearte.')
+      alert('Para proceder con tu compra debes iniciar sesión.')
       navigate('/login')
-    }
-  }
-
-  const handleConfirmPurchase = async (e) => {
-    e.preventDefault()
-
-    try {
-      // Crear consulta para obtener el documento con el email
-      const q = query(
-        collection(db, 'SignedUpUserData'),
-        where('Email', '==', email)
-      )
-      const querySnapshot = await getDocs(q)
-
-      // Verificar si se encontró el usuario y si la contraseña es correcta
-      if (!querySnapshot.empty) {
-        const userDoc = querySnapshot.docs[0].data()
-        if (userDoc.Password === password) {
-          // Comparar contraseñas directamente
-          setShowPopup(false)
-          alert('Compra realizada con éxito.')
-          // Vaciar el carrito después de la compra
-          dispatch({ type: 'CLEAR_CART' })
-        } else {
-          alert('Contraseña incorrecta.')
-        }
-      } else {
-        alert('No se encontró un usuario con ese email.')
-      }
-    } catch (error) {
-      alert('Hubo un error al verificar las credenciales.')
-      console.error('Error verifying credentials:', error)
     }
   }
 
@@ -145,58 +96,20 @@ const Cart = () => {
                   size={12}
                 />
               </button>
-              <button
-                className='purchase-btn'
-                onClick={handlePurchase}
-              >
-                Comprar
-              </button>
             </div>
           </li>
         ))}
       </ul>
+      <button
+        className='purchase-btn'
+        onClick={handlePurchase}
+      >
+        Comprar
+      </button>
 
       {showPopup && (
         <div className='popup'>
-          <form
-            onSubmit={handleConfirmPurchase}
-            className='popup-content'
-          >
-            <label>
-              Email:
-              <input
-                type='email'
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled // Deshabilitar el campo de email
-              />
-            </label>
-            <label>
-              Contraseña:
-              <input
-                type='password'
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </label>
-            <div className='popup-buttons'>
-              <button
-                type='submit'
-                className='confirm-btn'
-              >
-                Confirmar Compra
-              </button>
-              <button
-                type='button'
-                className='cancel-btn'
-                onClick={() => setShowPopup(false)}
-              >
-                Cancelar
-              </button>
-            </div>
-          </form>
+          <CheckoutProcess userEmail={auth.currentUser.email} />
         </div>
       )}
     </div>

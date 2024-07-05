@@ -10,6 +10,7 @@ const Detail = () => {
   const [product, setProduct] = useState(null)
   const { dispatch } = useCart()
   const navigate = useNavigate()
+  const [quantity, setQuantity] = useState(1)
   const [showPopup, setShowPopup] = useState(false)
 
   useEffect(() => {
@@ -35,19 +36,27 @@ const Detail = () => {
   }, [productId])
 
   const handleAddToCart = () => {
-    setShowPopup(true)
+    if (quantity > 0 && product) {
+      dispatch({ type: 'ADD_TO_CART', product: { ...product, quantity } })
+      setShowPopup(true)
+    }
   }
 
   const handleGoToCart = () => {
-    dispatch({ type: 'ADD_TO_CART', product })
     setShowPopup(false)
-    navigate('/cart') // Redirige al usuario al carrito
+    navigate('/cart')
   }
 
   const handleContinueShopping = () => {
     setShowPopup(false)
-    // Aquí podrías realizar alguna acción adicional si lo necesitas
-    // Por ejemplo, actualizar el estado o realizar alguna otra lógica
+  }
+
+  const handleQuantityChange = (event) => {
+    const value = Math.max(
+      1,
+      Math.min(product?.stock || 1, parseInt(event.target.value))
+    )
+    setQuantity(value)
   }
 
   return (
@@ -64,6 +73,13 @@ const Detail = () => {
             <div className='product-name'>{product.name}</div>
             <div className='product-price'>Precio: ${product.price}</div>
             <div className='product-stock'>Stock: {product.stock}</div>
+            <input
+              type='number'
+              value={quantity}
+              onChange={handleQuantityChange}
+              min='1'
+              max={product.stock}
+            />
           </div>
 
           <button
