@@ -11,6 +11,7 @@ const CheckoutProcess = ({ userEmail }) => {
   const [address, setAddress] = useState('')
   const [orderId, setOrderId] = useState(null)
   const [error, setError] = useState(null)
+  const [showPopup, setShowPopup] = useState(true) // Estado para controlar la visibilidad del popup
   const navigate = useNavigate()
   const { state, dispatch } = useCart()
 
@@ -60,7 +61,12 @@ const CheckoutProcess = ({ userEmail }) => {
   }
 
   const handleCloseCart = () => {
-    window.location.reload() // Recarga la página actual
+    setShowPopup(false)
+    window.location.reload()
+  }
+
+  if (!showPopup) {
+    return null // No renderizar nada si el popup está oculto
   }
 
   return (
